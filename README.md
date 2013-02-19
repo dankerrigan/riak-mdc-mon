@@ -69,7 +69,7 @@ Usage
 
 Options:  
 -p <app.properties> Set the properties file, defined above, to configure
-the tool.  Required.
+the tool.  Required.  
 -t Test alarm generation with out of tolerance alarms based on the
 configured values.  
 -n Test alarm generation with in tolerance alarms based on the configured
