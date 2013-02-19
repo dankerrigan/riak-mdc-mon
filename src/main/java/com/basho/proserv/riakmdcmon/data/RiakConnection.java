@@ -48,7 +48,7 @@ public class RiakConnection {
 			} catch (IOException e) {
 				//no-op
 			} catch (Exception e) {
-				e.printStackTrace();
+//				e.printStackTrace();
 				//no-op
 			}
 		}

@@ -10,6 +10,8 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.log4j.Logger;
+import org.apache.log4j.varia.NullAppender;
 
 import com.basho.proserv.riakmdcmon.Alarm.Alarm;
 import com.basho.proserv.riakmdcmon.Alarm.AlarmHandlerFactory;
@@ -22,8 +24,15 @@ public class App
 {
 	public static String CURRENT_ALARMS_FILENAME = "alarms.xml";
 	
+	public static void initLog4j() {
+		
+		Logger.getRootLogger().addAppender(new NullAppender());
+	}
+	
     public static void main( String[] args ) 
     {
+    	initLog4j();
+    	
     	String propertiesFilename = null;
     	File propertiesFile = null;
     	boolean test = false;
@@ -45,6 +54,7 @@ public class App
 		propertiesFile = new File(propertiesFilename);
 		if (!propertiesFile.exists()) {
 			System.out.println(String.format("The properties file %s does not exist. Exiting.", propertiesFilename));
+			System.exit(1);
 		}
 		
 		Configuration config = null;
@@ -86,8 +96,9 @@ public class App
     	
     	RiakSyncData syncCheck = new RiakSyncData(config, conn, new AlarmHandlerFactory(config));
     	
-    	String alarmsPath = ClassLoader.getSystemClassLoader().getResource(".").getPath() + 
-    			"/" + CURRENT_ALARMS_FILENAME;
+//    	String jarPath = ClassLoader.getSystemClassLoader().getResource(".").getPath();
+    	String jarPath = ".";
+    	String alarmsPath = jarPath + "/" + CURRENT_ALARMS_FILENAME;
     	File alarmsFile = new File(alarmsPath);
     	List<Alarm> previousAlarms = new ArrayList<Alarm>();
     	AlarmIo alarmIo = new AlarmIo(new File(alarmsPath));

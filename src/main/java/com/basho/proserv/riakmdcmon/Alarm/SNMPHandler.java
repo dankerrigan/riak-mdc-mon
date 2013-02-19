@@ -52,6 +52,9 @@ public class SNMPHandler implements IAlarmHandler {
 	
 	public void sendV1SNMPMessage(Alarm alarm) throws IOException {
 		long dt = Math.abs(alarm.localTimestamp() - alarm.remoteDataCenterTimestamp());
+		if (dt > 4294967296l) {
+			dt =  999999999l;
+		}
 //		int dtSeconds = (int)(dt/1000);
 //		System.out.println(dt);
 //		String alarmText = String.format(DEFAULT_SNMP_TEXT_FMT, alarm.remoteDataCenterId(), 
