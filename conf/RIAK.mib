@@ -1,0 +1,892 @@
+-- Riak database MIB.
+
+RIAK DEFINITIONS ::= BEGIN
+
+IMPORTS
+        enterprises, Gauge, Counter, IpAddress
+                FROM RFC1155-SMI
+        DisplayString
+                FROM RFC1213-MIB
+        OBJECT-TYPE
+                FROM RFC-1212;
+
+basho OBJECT IDENTIFIER ::= { enterprises 31130 }
+riak OBJECT IDENTIFIER ::= { basho 1 }
+riakrepl OBJECT IDENTIFIER ::= { basho 200 }
+riaktraps OBJECT IDENTIFIER ::= { basho 900 }
+
+vnodeGets OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Total number of gets performed by all vnodes on node."
+    ::= { riak 1 }
+vnodePuts OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Total number of puts performed by all vnodes on node."
+    ::= { riak 2 }
+nodeGets OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Number of gets coordinated by node."
+    ::= { riak 3 }
+nodePuts OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Number of puts coordinated by node."
+    ::= { riak 4 }
+nodeGetTimeMean OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Mean time in microseconds from starting up a riak_get_fsm to that
+        FSM responding to the client."
+    ::= { riak 5 }
+nodeGetTimeMedian OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Median time in microseconds from starting up a riak_get_fsm to
+        that FSM responding to the client."
+    ::= { riak 6 }
+nodeGetTime95 OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Maximum time in microseconds that from starting up a riak_get_fsm
+        to that FSM responding to the client, for 95% of executions."
+    ::= { riak 7 }
+nodeGetTime99 OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Maximum time in microseconds that from starting up a riak_get_fsm
+        to that FSM responding to the client, for 99% of executions."
+    ::= { riak 8 }
+nodeGetTime100 OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Maximum time in microseconds that from starting up a riak_get_fsm
+        to that FSM responding to the client."
+    ::= { riak 9 }
+nodePutTimeMean OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Mean time in microseconds from starting up a riak_put_fsm to that
+        FSM responding to the client."
+    ::= { riak 10 }
+nodePutTimeMedian OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Median time in microseconds from starting up a riak_put_fsm to
+        that FSM responding to the client."
+    ::= { riak 11 }
+nodePutTime95 OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Maximum time in microseconds that from starting up a riak_put_fsm
+        to that FSM responding to the client, for 95% of executions."
+    ::= { riak 12 }
+nodePutTime99 OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Maximum time in microseconds that from starting up a riak_put_fsm
+        to that FSM responding to the client, for 99% of executions."
+    ::= { riak 13 }
+nodePutTime100 OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Maximum time in microseconds that from starting up a riak_put_fsm
+        to that FSM responding to the client."
+    ::= { riak 14 }
+
+-- Repl stats
+
+replRealtimeStatusTable OBJECT-TYPE
+    SYNTAX SEQUENCE OF ReplRealtimeStatusEntry
+    ACCESS not-accessible
+    STATUS mandatory
+    DESCRIPTION
+        "Table indicating status of realtime replication."
+    ::= { riakrepl 1 }
+
+replRealtimeStatusEntry OBJECT-TYPE
+    SYNTAX ReplRealtimeStatusEntry
+    ACCESS not-accessible
+    STATUS mandatory
+    DESCRIPTION
+        "A table entry of realtime replication status."
+    INDEX { replRealtimeSinkName }
+    ::= { replRealtimeStatusTable 1 }
+
+ReplRealtimeStatusEntry ::= SEQUENCE {
+    replRealtimeSinkName DisplayString,
+    replRealtimeEnabled  INTEGER { true(1), false(2) },
+    replRealtimeStarted  INTEGER { true(1), false(2) }
+}
+
+replRealtimeSinkName OBJECT-TYPE
+    SYNTAX DisplayString
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Table row index for realtime replication status."
+    ::= { replRealtimeStatusEntry 1 }
+
+replRealtimeEnabled OBJECT-TYPE
+    SYNTAX INTEGER { true(1), false(2) }
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Boolean indicating whether realtime replication for the associated
+        sink is enabled."
+    ::= { replRealtimeStatusEntry 2 }
+
+replRealtimeStarted OBJECT-TYPE
+    SYNTAX INTEGER { true(1), false(2) }
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Boolean indicating whether realtime replication for the associated
+        sink is started."
+    ::= { replRealtimeStatusEntry 3 }
+
+replFullsyncStatusTable OBJECT-TYPE
+    SYNTAX SEQUENCE OF ReplFullsyncStatusEntry
+    ACCESS not-accessible
+    STATUS mandatory
+    DESCRIPTION
+        "Table indicating status of fullsync replication."
+    ::= { riakrepl 2 }
+
+replFullsyncStatusEntry OBJECT-TYPE
+    SYNTAX ReplFullsyncStatusEntry
+    ACCESS not-accessible
+    STATUS mandatory
+    DESCRIPTION
+        "A table entry of replication fullsync status."
+    INDEX { replFullsyncSinkName }
+    ::= { replFullsyncStatusTable 1 }
+
+ReplFullsyncStatusEntry ::= SEQUENCE {
+    replFullsyncSinkName DisplayString,
+    replFullsyncEnabled  INTEGER { true(1), false(2) },
+    replFullsyncRunning  INTEGER { true(1), false(2) }
+}
+
+replFullsyncSinkName OBJECT-TYPE
+    SYNTAX DisplayString
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Table row index for fulltime replication status."
+    ::= { replFullsyncStatusEntry 1 }
+
+replFullsyncEnabled OBJECT-TYPE
+    SYNTAX INTEGER { true(1), false(2) }
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Boolean indicating whether fullsync replication for the associated
+        sink is enabled."
+    ::= { replFullsyncStatusEntry 2 }
+
+replFullsyncRunning OBJECT-TYPE
+    SYNTAX INTEGER { true(1), false(2) }
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Boolean indicating whether fullsync replication for the associated
+        sink is running."
+    ::= { replFullsyncStatusEntry 3 }
+
+replClientBytesRecv OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "The total number of bytes the client has received since the server
+        has been started."
+    ::= { riakrepl 5 }
+
+replClientBytesSent OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "The total number of bytes sent to all connected sites."
+    ::= { riakrepl 6 }
+
+replClientConnectErrors OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "The number of site-to-listener TCP/IP connection errors."
+    ::= { riakrepl 7 }
+
+replClientConnects OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "A count of the number of site connections made to this node."
+    ::= { riakrepl 8 }
+
+replClientRedirect OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "A count of the number of times a client connected to a non-leader
+        node and was redirected to a leader node."
+    ::= { riakrepl 9 }
+
+replClientRxRateTable OBJECT-TYPE
+    SYNTAX SEQUENCE OF ReplClientRxRateEntry
+    ACCESS not-accessible
+    STATUS mandatory
+    DESCRIPTION
+        "Table of 8 most recent per-minute measurements of client (site)
+        receive rates in kilobits/second."
+    ::= { riakrepl 10 }
+
+replClientRxRateEntry OBJECT-TYPE
+    SYNTAX ReplClientRxRateEntry
+    ACCESS not-accessible
+    STATUS mandatory
+    DESCRIPTION
+        "A table entry of client (site) receive rate."
+    INDEX { replClientRxIndex }
+    ::= { replClientRxRateTable 1 }
+
+ReplClientRxRateEntry ::= SEQUENCE {
+    replClientRxIndex  INTEGER,
+    replClientRxRate   Gauge
+}
+
+replClientRxIndex OBJECT-TYPE
+    SYNTAX INTEGER
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Table row index for client (site) receive rates. The latest rate
+        value has the lowest row index, the oldest the highest row index."
+    ::= { replClientRxRateEntry 1 }
+
+replClientRxRate OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "A snapshot of the client (site) receive rate in kilobits/second."
+    ::= { replClientRxRateEntry 2 }
+
+replClientTxRateTable OBJECT-TYPE
+    SYNTAX SEQUENCE OF ReplClientTxRateEntry
+    ACCESS not-accessible
+    STATUS mandatory
+    DESCRIPTION
+        "Table of 8 most recent per-minute measurements of client (site)
+        send rates in kilobits/second."
+    ::= { riakrepl 11 }
+
+replClientTxRateEntry OBJECT-TYPE
+    SYNTAX ReplClientTxRateEntry
+    ACCESS not-accessible
+    STATUS mandatory
+    DESCRIPTION
+        "A table entry of client (site) send rate."
+    INDEX { replClientTxIndex }
+    ::= { replClientTxRateTable 1 }
+
+ReplClientTxRateEntry ::= SEQUENCE {
+    replClientTxIndex  INTEGER,
+    replClientTxRate   Gauge
+}
+
+replClientTxIndex OBJECT-TYPE
+    SYNTAX INTEGER
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Table row index for client (site) send rates. The latest rate
+        value has the lowest row index, the oldest the highest row index."
+    ::= { replClientTxRateEntry 1 }
+
+replClientTxRate OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "A snapshot of the client (site) send rate in kilobits/second."
+    ::= { replClientTxRateEntry 2 }
+
+replObjectsDroppedNoClients OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "If the real-time replication work queue is full and there aren't
+        any clients to receive objects, then objects will be dropped from
+        the queue. These objects will be synchronized during a fullsync."
+    ::= { riakrepl 12 }
+
+replObjectsDroppedNoLeader OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "If a client (site) cannot connect to a leader, objects will be
+        dropped during real-time replication."
+    ::= { riakrepl 13 }
+
+replObjectsForwarded OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "The number of Riak objects forwarded to the leader the participate
+        in replication. Please note that this value will only be accurate
+        on a non-leader node."
+    ::= { riakrepl 14 }
+
+replObjectsSent OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "The number of objects sent via real-time replication."
+    ::= { riakrepl 15 }
+
+replServerBytesRecv OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "The total number of bytes the server (listener) has received."
+    ::= { riakrepl 16 }
+
+replServerBytesSent OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "The total number of bytes the server (listener) has sent."
+    ::= { riakrepl 17 }
+
+replServerConnectErrors OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "The number of listener-to-site connection errors."
+    ::= { riakrepl 18 }
+
+replServerConnects OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "The number of times the listener connects to the client site."
+    ::= { riakrepl 19 }
+
+replServerFullsyncs OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "The number of full-synchronizations that have occurred since the
+        server was started."
+    ::= { riakrepl 20 }
+
+replServerRxRateTable OBJECT-TYPE
+    SYNTAX SEQUENCE OF ReplServerRxRateEntry
+    ACCESS not-accessible
+    STATUS mandatory
+    DESCRIPTION
+        "Table of 8 most recent per-minute measurements of server
+        (listener) receive rates in kilobits/second."
+    ::= { riakrepl 21 }
+
+replServerRxRateEntry OBJECT-TYPE
+    SYNTAX ReplServerRxRateEntry
+    ACCESS not-accessible
+    STATUS mandatory
+    DESCRIPTION
+        "A table entry of server (listener) receive rate."
+    INDEX { replServerRxIndex }
+    ::= { replServerRxRateTable 1 }
+
+ReplServerRxRateEntry ::= SEQUENCE {
+    replServerRxIndex  INTEGER,
+    replServerRxRate   Gauge
+}
+
+replServerRxIndex OBJECT-TYPE
+    SYNTAX INTEGER
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Table row index for server (listener) receive rates. The latest
+        rate value has the lowest row index, the oldest the highest row
+        index."
+    ::= { replServerRxRateEntry 1 }
+
+replServerRxRate OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "A snapshot of the server (listener) receive rate in
+        kilobits/second."
+    ::= { replServerRxRateEntry 2 }
+
+replServerTxRateTable OBJECT-TYPE
+    SYNTAX SEQUENCE OF ReplServerTxRateEntry
+    ACCESS not-accessible
+    STATUS mandatory
+    DESCRIPTION
+        "Table of 8 most recent per-minute measurements of server
+        (listener) send rates in kilobits/second."
+    ::= { riakrepl 22 }
+
+replServerTxRateEntry OBJECT-TYPE
+    SYNTAX ReplServerTxRateEntry
+    ACCESS not-accessible
+    STATUS mandatory
+    DESCRIPTION
+        "A table entry of server (listener) send rate."
+    INDEX { replServerTxIndex }
+    ::= { replServerTxRateTable 1 }
+
+ReplServerTxRateEntry ::= SEQUENCE {
+    replServerTxIndex  INTEGER,
+    replServerTxRate   Gauge
+}
+
+replServerTxIndex OBJECT-TYPE
+    SYNTAX INTEGER
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Table row index for server (listener) send rates. The latest rate
+        value has the lowest row index, the oldest the highest row index."
+    ::= { replServerTxRateEntry 1 }
+
+replServerTxRate OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "A snapshot of the server (listener) send rate in kilobits/second."
+    ::= { replServerTxRateEntry 2 }
+
+replRtDirty OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "The number of real-time source errors and/or real-time sink errors
+        detected. This value will persist across restarts until a fullsync
+        is complete."
+    ::= { riakrepl 23 }
+
+replRtSinkErrors OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "The number of sink errors detected on the source node. This value
+        will be reset to 0 after a node restarts."
+    ::= { riakrepl 24 }
+
+replRtSourceErrors OBJECT-TYPE
+    SYNTAX Counter
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "The number of source errors detected on the source node. This
+        value will be reset to 0 after a node restarts."
+    ::= { riakrepl 25 }
+
+replClusterLeaderNode OBJECT-TYPE
+    SYNTAX DisplayString
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Replication cluster leader node."
+    ::= { riakrepl 26 }
+    
+replSynchronizationLatencyNodeId OBJECT-TYPE
+    SYNTAX DisplayString
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Replication cluster node id as identified by riak-mdc-mon"
+    ::= { riakrepl 27 }
+    
+replSynchronizationLatency OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Replication latency measured by comparing local system time
+        against remote system time written by remote data center, as
+        calculated by riak-mdc-mon."
+    ::= { riakrepl 28 }
+
+-- Monitoring Traps
+
+nodeGetTimeMeanThreshold OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Threshold value for nodeGetTimeMean. A nodeGetTimeMean value
+        rising above this threshold causes a rising trap, and a falling
+        trap when it falls back below."
+    ::= { riak 15 }
+nodeGetTimeMedianThreshold OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Threshold value for nodeGetTimeMedian. A nodeGetTimeMedian value
+        rising above this threshold causes a rising trap, and a falling
+        trap when it falls back below."
+    ::= { riak 16 }
+nodeGetTime95Threshold OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Threshold value for nodeGetTime95. A nodeGetTime95 value rising
+        above this threshold causes a rising trap, and a falling trap when
+        it falls back below."
+    ::= { riak 17 }
+nodeGetTime99Threshold OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Threshold value for nodeGetTime99. A nodeGetTime99 value rising
+        above this threshold causes a rising trap, and a falling trap when
+        it falls back below."
+    ::= { riak 18 }
+nodeGetTime100Threshold OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Threshold value for nodeGetTime100. A nodeGetTime100 value rising
+        above this threshold causes a rising trap, and a falling trap when
+        it falls back below."
+    ::= { riak 19 }
+nodePutTimeMeanThreshold OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Threshold value for nodePutTimeMean. A nodePutTimeMean value
+        rising above this threshold causes a rising trap, and a falling
+        trap when it falls back below."
+    ::= { riak 20 }
+nodePutTimeMedianThreshold OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Threshold value for nodePutTimeMedian. A nodePutTimeMedian value
+        rising above this threshold causes a rising trap, and a falling
+        trap when it falls back below."
+    ::= { riak 21 }
+nodePutTime95Threshold OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Threshold value for nodePutTime95. A nodePutTime95 value rising
+        above this threshold causes a rising trap, and a falling trap when
+        it falls back below."
+    ::= { riak 22 }
+nodePutTime99Threshold OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Threshold value for nodePutTime99. A nodePutTime99 value rising
+        above this threshold causes a rising trap, and a falling trap when
+        it falls back below."
+    ::= { riak 23 }
+nodePutTime100Threshold OBJECT-TYPE
+    SYNTAX Gauge
+    ACCESS read-only
+    STATUS mandatory
+    DESCRIPTION
+        "Threshold value for nodePutTime100. A nodePutTime100 value rising
+        above this threshold causes a rising trap, and a falling trap when
+        it falls back below."
+    ::= { riak 24 }
+
+replSynchronizationLatencyThreshold OBJECT-TYPE
+   SYNTAX Gauge
+   ACCESS read-only
+   STATUS mandatory
+   DESCRIPTION
+       "Threshold value for replSynchronizationLatency. A
+       synchrnonizationLatency value rising above this threshold causes
+       a rising trap, and a falling trap when it falls back below."
+   ::= { riak 25 }
+
+nodeGetTimeMeanAlarmRising TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodeGetTimeMean, nodeGetTimeMeanThreshold }
+    DESCRIPTION
+        "SNMP trap generated when mean time for riak_get_fsm client
+        responses exceeds its threshold."
+    ::= 1
+
+nodeGetTimeMeanAlarmFalling TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodeGetTimeMean, nodeGetTimeMeanThreshold }
+    DESCRIPTION
+        "SNMP trap generated when mean time for riak_get_fsm client
+        responses falls back below its threshold after having exceeded it."
+    ::= 2
+
+nodeGetTimeMedianAlarmRising TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodeGetTimeMedian, nodeGetTimeMedianThreshold }
+    DESCRIPTION
+        "SNMP trap generated when median time for riak_get_fsm client
+        responses exceeds its threshold."
+    ::= 3
+
+nodeGetTimeMedianAlarmFalling TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodeGetTimeMedian, nodeGetTimeMedianThreshold }
+    DESCRIPTION
+        "SNMP trap generated when median time for riak_get_fsm client
+        responses falls back below its threshold after having exceeded it."
+    ::= 4
+
+nodeGetTime95AlarmRising TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodeGetTime95, nodeGetTime95Threshold }
+    DESCRIPTION
+        "SNMP trap generated when time for 95% of riak_get_fsm client
+        responses exceeds its threshold."
+    ::= 5
+
+nodeGetTime95AlarmFalling TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodeGetTime95, nodeGetTime95Threshold }
+    DESCRIPTION
+        "SNMP trap generated when time for 95% of riak_get_fsm client
+        responses falls back below its threshold after having exceeded it."
+    ::= 6
+
+nodeGetTime99AlarmRising TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodeGetTime99, nodeGetTime99Threshold }
+    DESCRIPTION
+        "SNMP trap generated when time for 99% of riak_get_fsm client
+        responses exceeds its threshold."
+    ::= 7
+
+nodeGetTime99AlarmFalling TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodeGetTime99, nodeGetTime99Threshold }
+    DESCRIPTION
+        "SNMP trap generated when time for 99% of riak_get_fsm client
+        responses falls back below its threshold after having exceeded it."
+    ::= 8
+
+nodeGetTime100AlarmRising TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodeGetTime100, nodeGetTime100Threshold }
+    DESCRIPTION
+        "SNMP trap generated when time for riak_get_fsm client responses
+        exceeds its threshold."
+    ::= 9
+
+nodeGetTime100AlarmFalling TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodeGetTime100, nodeGetTime100Threshold }
+    DESCRIPTION
+        "SNMP trap generated when time for riak_get_fsm client responses
+        falls back below its threshold after having exceeded it."
+    ::= 10
+
+nodePutTimeMeanAlarmRising TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodePutTimeMean, nodePutTimeMeanThreshold }
+    DESCRIPTION
+        "SNMP trap generated when mean time for riak_put_fsm client
+        responses exceeds its threshold."
+    ::= 11
+
+nodePutTimeMeanAlarmFalling TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodePutTimeMean, nodePutTimeMeanThreshold }
+    DESCRIPTION
+        "SNMP trap generated when mean time for riak_put_fsm client
+        responses falls back below its threshold after having exceeded it."
+    ::= 12
+
+nodePutTimeMedianAlarmRising TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodePutTimeMedian, nodePutTimeMedianThreshold }
+    DESCRIPTION
+        "SNMP trap generated when median time for riak_put_fsm client
+        responses exceeds its threshold."
+    ::= 13
+
+nodePutTimeMedianAlarmFalling TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodePutTimeMedian, nodePutTimeMedianThreshold }
+    DESCRIPTION
+        "SNMP trap generated when median time for riak_put_fsm client
+        responses falls back below its threshold after having exceeded it."
+    ::= 14
+
+nodePutTime95AlarmRising TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodePutTime95, nodePutTime95Threshold }
+    DESCRIPTION
+        "SNMP trap generated when time for 95% of riak_put_fsm client
+        responses exceeds its threshold."
+    ::= 15
+
+nodePutTime95AlarmFalling TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodePutTime95, nodePutTime95Threshold }
+    DESCRIPTION
+        "SNMP trap generated when time for 95% of riak_put_fsm client
+        responses falls back below its threshold after having exceeded it."
+    ::= 16
+
+nodePutTime99AlarmRising TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodePutTime99, nodePutTime99Threshold }
+    DESCRIPTION
+        "SNMP trap generated when time for 99% of riak_put_fsm client
+        responses exceeds its threshold."
+    ::= 17
+
+nodePutTime99AlarmFalling TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodePutTime99, nodePutTime99Threshold }
+    DESCRIPTION
+        "SNMP trap generated when time for 99% of riak_put_fsm client
+        responses falls back below its threshold after having exceeded it."
+    ::= 18
+
+nodePutTime100AlarmRising TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodePutTime100, nodePutTime100Threshold }
+    DESCRIPTION
+        "SNMP trap generated when time for riak_put_fsm client responses
+        exceeds its threshold."
+    ::= 19
+
+nodePutTime100AlarmFalling TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { nodePutTime100, nodePutTime100Threshold }
+    DESCRIPTION
+        "SNMP trap generated when time for riak_put_fsm client responses
+        falls back below its threshold after having exceeded it."
+    ::= 20
+
+replClientConnectErrorAlarm TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { replClientConnectErrors }
+    DESCRIPTION
+        "SNMP trap generated due to an increase in the counter for
+        replication client connection errors."
+    ::= 21
+
+replServerConnectErrorAlarm TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { replServerConnectErrors }
+    DESCRIPTION
+        "SNMP trap generated due to an increase in the counter for
+        replication server connection errors."
+    ::= 22
+
+replObjectsDroppedNoClientsAlarm TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { replObjectsDroppedNoClients }
+    DESCRIPTION
+        "SNMP trap generated due to an increase in the counter for
+        replication objects dropped due to no clients."
+    ::= 23
+
+replObjectsDroppedNoLeaderAlarm TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { replObjectsDroppedNoLeader }
+    DESCRIPTION
+        "SNMP trap generated due to an increase in the counter for
+        replication objects dropped due to no leader."
+    ::= 24
+
+replRtSinkErrorAlarm TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { replRtSinkErrors }
+    DESCRIPTION
+        "SNMP generated due to an increase in the counter for realtime
+        replication sink errors."
+    ::= 25
+
+replRtSourceErrorAlarm TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { replRtSourceErrors }
+    DESCRIPTION
+        "SNMP generated due to an increase in the counter for realtime
+        replication source errors."
+    ::= 26
+    
+replLatencyAlarmRising TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { replSynchronizationLatencyNodeId, replSynchronizationLatency,
+        replSynchronizationLatencyThreshold }
+    DESCRIPTION
+        "SNMP trap generated when calculated node replication latency exceeds
+        its threshold."
+    ::= 27
+    
+replLatencyAlarmFalling TRAP-TYPE
+    ENTERPRISE riaktraps
+    VARIABLES { replSynchronizationLatencyNodeId, replSynchronizationLatency,
+        replSynchronizationLatencyThreshold }
+    DESCRIPTION
+        "SNMP trap generated when calculated node replication latency falls
+        back below its threshold after having exceeded it."
+    ::= 28
+
+END
