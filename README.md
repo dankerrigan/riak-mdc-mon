@@ -75,6 +75,11 @@ configured values.
 -n Test alarm generation with in tolerance alarms based on the configured
 values.  
 
+Since this tool simply runs the check once then exits so you'll want to run
+this run it with a cron job.  Example crontab entry to run the program 
+every 5 minutes:  
+```*/5 * * * * java -jar /path/to/riak-mdc-mon/riak-mdc-mon-0.0.1.jar -p /path/to/riak-mdc-mon/conf/app.properties```
+
 Examples
 ---------------------------------------------------------------------
 Run the program in normal mode:  
